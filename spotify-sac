@@ -22,7 +22,6 @@ echo -e "Waiting for \"$artist - $title\" to finish...\nCtrl-C to cancel."
 
 while [[ $song == $nowplaying ]]; do
   is_active
-  # echo "$song, $nowplaying"
   sleep 1
   nowplaying=$(dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'Metadata' | grep -A 1 "mpris:trackid" | tail -n 1 | tr -s ' ' | cut -d' ' -f4 | tr -d '"')
 done
