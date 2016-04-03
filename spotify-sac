@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#
+# spotify-sac
+# https://github.com/flobosg/spotify-sac
+#
+# "Stop after current" implementation for Spotify Linux using D-Bus.
+
+is_active(){
+  WINDOWID=$(xdotool search --classname "spotify" | tail -n 1)
+  if [[ -z "$WINDOWID" ]]; then
+    echo "Spotify is not running."
+    exit 1
+  fi
+}
+
+is_active
+song=$(dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'Metadata' | grep -A 1 "mpris:trackid" | tail -n 1 | tr -s ' ' | cut -d' ' -f4 | tr -d '"')
+nowplaying=$song
+artist=$(dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'Metadata' | grep -A2 artist | tail -n 1 | tr -s ' ' | sed "s/^ string //" | sed 's/^.\(.*\).$/\1/')
+title=$(dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'Metadata' | grep -A1 title | tail -n 1 | tr -s ' ' | sed 's/ variant string //' | sed 's/^.\(.*\).$/\1/')
+echo -e "Waiting for \"$artist - $title\" to finish...\nCtrl-C to cancel."
+
+while [[ $song == $nowplaying ]]; do
+  is_active
+  # echo "$song, $nowplaying"
+  sleep 1
+  nowplaying=$(dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'Metadata' | grep -A 1 "mpris:trackid" | tail -n 1 | tr -s ' ' | cut -d' ' -f4 | tr -d '"')
+done
+
+dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause
