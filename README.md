@@ -1,7 +1,7 @@
 # spotify-sac
 ## “Stop after current” implementation for Spotify Linux using D-Bus.
 
-This script has only been tested in Spotify version 1.0.25.127 running on Ubuntu 14.04. It's a quick and dirty implementation, but it should work fine in most cases.
+This script has only been tested in Spotify version 1.0.25.127 running on Ubuntu 14.04. It's a quick and dirty implementation, but should work well in most cases.
 
 ## Dependencies
 
